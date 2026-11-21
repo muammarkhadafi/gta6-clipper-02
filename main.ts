@@ -34,6 +34,20 @@ if (typeof videoUrl !== 'string' || videoUrl.length === 0) {
   process.exit(1);
 }
 
+// The gate only reads YouTube videos, so refuse an address that is not one: a wrong host
+// fails loudly here instead of shipping a VIDEO.json the house cannot read.
+let host = '';
+try {
+  host = new URL(videoUrl).hostname.toLowerCase();
+} catch {
+  console.error(`VIDEO.json url is not a valid address: ${videoUrl}`);
+  process.exit(1);
+}
+if (!/^(www\.|m\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)$/.test(host)) {
+  console.error(`VIDEO.json url is not a YouTube address: ${videoUrl}`);
+  process.exit(1);
+}
+
 try {
   copyFileSync(videoPath, join(OUTPUT_DIR, 'VIDEO.json'));
 } catch (err) {
